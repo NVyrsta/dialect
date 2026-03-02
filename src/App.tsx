@@ -9,7 +9,7 @@ import { Signup } from './pages/Signup';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/dialect">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
