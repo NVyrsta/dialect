@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -10,6 +11,14 @@ const navLinks = [
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    setIsMenuOpen(false);
+    navigate('/');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
@@ -41,18 +50,31 @@ export function Header() {
 
           {/* Desktop Auth buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              to="/login"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/signup"
-              className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors"
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -95,20 +117,40 @@ export function Header() {
               </NavLink>
             ))}
             <hr className="border-gray-200" />
-            <Link
-              to="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="text-base font-medium text-gray-600 hover:text-gray-900 py-2"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/signup"
-              onClick={() => setIsMenuOpen(false)}
-              className="text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-lg text-center"
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-lg text-center"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-base font-medium text-gray-600 hover:text-gray-900 py-2 text-left"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-base font-medium text-gray-600 hover:text-gray-900 py-2"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-lg text-center"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
