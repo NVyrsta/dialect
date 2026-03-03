@@ -1,15 +1,38 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTestById, submitTestResult } from '../services/testService';
-import type { Test, TestAnswer } from '../types/test';
+import { getTestWithQuestions, submitTestResult } from '../services/testService';
+import type { TestWithQuestions, TestAnswer } from '../types/test';
 
 type Step = 'info' | 'test' | 'result';
 
+// Normalize correctAnswer to boolean (handles string "true"/"false" from Firebase)
+function normalizeAnswer(answer: unknown): boolean {
+  if (typeof answer === 'boolean') return answer;
+  if (typeof answer === 'string') {
+    return answer.toLowerCase() === 'true' || answer.toLowerCase() === 'yes';
+  }
+  return false;
+}
+
+// Email validation
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Phone validation (Ukrainian format or international)
+function isValidPhone(phone: string): boolean {
+  if (!phone) return true; // Optional field
+  const phoneRegex = /^[\d\s\-+()]{10,}$/;
+  return phoneRegex.test(phone.replace(/\s/g, ''));
+}
+
 export function TakeTest() {
   const { testId } = useParams<{ testId: string }>();
-  const [test, setTest] = useState<Test | null>(null);
+  const [test, setTest] = useState<TestWithQuestions | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Steps
   const [step, setStep] = useState<Step>('info');
@@ -18,10 +41,11 @@ export function TakeTest() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [formErrors, setFormErrors] = useState<{ email?: string; phone?: string }>({});
 
   // Test state
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [startedAt, setStartedAt] = useState<Date | null>(null);
 
   // Result
@@ -40,11 +64,13 @@ export function TakeTest() {
 
   const loadTest = async (id: string) => {
     try {
-      const testData = await getTestById(id);
+      const testData = await getTestWithQuestions(id);
       if (!testData) {
         setError('Test not found');
       } else if (!testData.isPublished) {
         setError('This test is not available');
+      } else if (testData.questions.length === 0) {
+        setError('This test has no questions');
       } else {
         setTest(testData);
       }
@@ -56,13 +82,33 @@ export function TakeTest() {
     }
   };
 
+  const validateForm = (): boolean => {
+    const errors: { email?: string; phone?: string } = {};
+
+    if (!isValidEmail(email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (phone && !isValidPhone(phone)) {
+      errors.phone = 'Please enter a valid phone number';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleStartTest = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setStartedAt(new Date());
     setStep('test');
   };
 
-  const handleAnswer = (questionId: string, answer: string | string[]) => {
+  const handleAnswer = (questionId: string, answer: boolean) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
@@ -79,18 +125,21 @@ export function TakeTest() {
   };
 
   const handleSubmit = async () => {
-    if (!test || !startedAt) return;
+    if (!test || !startedAt || submitting) return;
 
-    // Build answers array
+    setSubmitting(true);
+
+    // Build answers array with question details
     const testAnswers: TestAnswer[] = test.questions.map((q) => {
-      const userAnswer = answers[q.id] || '';
-      const isCorrect = Array.isArray(q.correctAnswer)
-        ? JSON.stringify(userAnswer) === JSON.stringify(q.correctAnswer)
-        : userAnswer === q.correctAnswer;
+      const userAnswer = answers[q.id] ?? false;
+      const correctAnswer = normalizeAnswer(q.correctAnswer);
+      const isCorrect = userAnswer === correctAnswer;
 
       return {
         questionId: q.id,
-        answer: userAnswer,
+        questionText: q.text,
+        userAnswer,
+        correctAnswer,
         isCorrect,
       };
     });
@@ -99,7 +148,7 @@ export function TakeTest() {
       await submitTestResult(
         test.id,
         test.title,
-        { name, email, phone },
+        { name, email, phone: phone || undefined },
         testAnswers,
         startedAt
       );
@@ -120,6 +169,8 @@ export function TakeTest() {
     } catch (err) {
       console.error('Failed to submit test:', err);
       alert('Failed to submit test. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -179,20 +230,37 @@ export function TakeTest() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (formErrors.email) setFormErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${
+                    formErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                   required
                 />
+                {formErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (formErrors.phone) setFormErrors((prev) => ({ ...prev, phone: undefined }));
+                  }}
+                  placeholder="+380..."
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${
+                    formErrors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 />
+                {formErrors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                )}
               </div>
             </div>
 
@@ -208,11 +276,12 @@ export function TakeTest() {
     );
   }
 
-  // Step: Test
+  // Step: Test (Yes/No questions)
   if (step === 'test') {
     const question = test.questions[currentQuestion];
     const isLastQuestion = currentQuestion === test.questions.length - 1;
     const currentAnswer = answers[question.id];
+    const hasAnswer = currentAnswer !== undefined;
 
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -233,44 +302,33 @@ export function TakeTest() {
 
           {/* Question */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">{question.question}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{question.text}</h2>
 
-            {/* Options for choice questions */}
-            {question.options && (
-              <div className="space-y-3">
-                {question.options.map((option, index) => (
-                  <label
-                    key={index}
-                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                      currentAnswer === option
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={question.id}
-                      value={option}
-                      checked={currentAnswer === option}
-                      onChange={() => handleAnswer(question.id, option)}
-                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                    />
-                    <span className="ml-3 text-gray-700">{option}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {/* Text input for fill-blank questions */}
-            {question.type === 'fill_blank' && (
-              <input
-                type="text"
-                value={(currentAnswer as string) || ''}
-                onChange={(e) => handleAnswer(question.id, e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg"
-                placeholder="Type your answer..."
-              />
-            )}
+            {/* Yes/No buttons */}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => handleAnswer(question.id, true)}
+                className={`flex-1 py-4 text-lg font-medium rounded-lg border-2 transition-colors ${
+                  currentAnswer === true
+                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAnswer(question.id, false)}
+                className={`flex-1 py-4 text-lg font-medium rounded-lg border-2 transition-colors ${
+                  currentAnswer === false
+                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                }`}
+              >
+                No
+              </button>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -286,15 +344,15 @@ export function TakeTest() {
             {isLastQuestion ? (
               <button
                 onClick={handleSubmit}
-                disabled={!currentAnswer}
+                disabled={!hasAnswer || submitting}
                 className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                Submit Test
+                {submitting ? 'Submitting...' : 'Submit Test'}
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                disabled={!currentAnswer}
+                disabled={!hasAnswer}
                 className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Next →

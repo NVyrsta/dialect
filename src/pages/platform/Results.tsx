@@ -164,6 +164,14 @@ export function Results() {
                 </div>
               </div>
 
+              {/* Contact info */}
+              {selectedResult.takerPhone && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-500">Phone</div>
+                  <div className="font-medium text-gray-900">{selectedResult.takerPhone}</div>
+                </div>
+              )}
+
               {/* Answers */}
               <h3 className="font-semibold text-gray-900 mb-3">Answers</h3>
               <div className="space-y-2">
@@ -176,20 +184,32 @@ export function Results() {
                         : 'border-red-200 bg-red-50'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">
-                        Question {index + 1}
-                      </span>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <span className="text-xs text-gray-400">#{index + 1}</span>
+                        <p className="text-sm font-medium text-gray-900 mt-0.5">
+                          {answer.questionText || `Question ${index + 1}`}
+                        </p>
+                      </div>
                       <span
-                        className={`text-xs font-medium ${
-                          answer.isCorrect ? 'text-green-600' : 'text-red-600'
+                        className={`text-xs font-medium px-2 py-1 rounded ${
+                          answer.isCorrect
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
                         }`}
                       >
-                        {answer.isCorrect ? 'Correct' : 'Wrong'}
+                        {answer.isCorrect ? '✓' : '✗'}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Answer: {Array.isArray(answer.answer) ? answer.answer.join(', ') : answer.answer}
+                    <div className="mt-2 flex items-center gap-4 text-sm">
+                      <span className={answer.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                        Answer: <strong>{answer.userAnswer ? 'Yes' : 'No'}</strong>
+                      </span>
+                      {!answer.isCorrect && (
+                        <span className="text-gray-500">
+                          Correct: <strong>{answer.correctAnswer ? 'Yes' : 'No'}</strong>
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

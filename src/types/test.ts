@@ -10,24 +10,42 @@ export const ENGLISH_LEVELS = {
 
 export type EnglishLevel = (typeof ENGLISH_LEVELS)[keyof typeof ENGLISH_LEVELS];
 
-// Question types
+export const ENGLISH_LEVEL_LABELS: Record<EnglishLevel, string> = {
+  A1: 'Beginner (A1)',
+  A2: 'Elementary (A2)',
+  B1: 'Intermediate (B1)',
+  B2: 'Upper-Intermediate (B2)',
+  C1: 'Advanced (C1)',
+  C2: 'Proficient (C2)',
+};
+
+// Question types - starting simple with yes/no
 export const QUESTION_TYPES = {
-  SINGLE_CHOICE: 'single_choice',
-  MULTIPLE_CHOICE: 'multiple_choice',
-  FILL_BLANK: 'fill_blank',
+  YES_NO: 'yes_no',
 } as const;
 
 export type QuestionType = (typeof QUESTION_TYPES)[keyof typeof QUESTION_TYPES];
 
 // Single question
-export interface TestQuestion {
+export interface Question {
   id: string;
   type: QuestionType;
-  question: string;
-  options?: string[]; // for choice questions
-  correctAnswer: string | string[]; // string for single, array for multiple
-  points: number;
-  level?: EnglishLevel; // optional level for adaptive tests
+  text: string; // The question text
+  correctAnswer: boolean; // true = Yes, false = No
+  level: EnglishLevel;
+  // Authorship
+  createdBy: {
+    uid: string;
+    name: string;
+    email: string;
+  };
+  updatedBy?: {
+    uid: string;
+    name: string;
+    email: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Test definition
@@ -35,18 +53,24 @@ export interface Test {
   id: string;
   title: string;
   description: string;
-  type: 'level_test' | 'grammar' | 'vocabulary' | 'other';
-  questions: TestQuestion[];
-  timeLimit?: number; // in minutes, optional
+  questionIds: string[]; // References to questions
+  timeLimit?: number; // in minutes
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Answer from test taker
+// Test with populated questions (for taking test)
+export interface TestWithQuestions extends Omit<Test, 'questionIds'> {
+  questions: Question[];
+}
+
+// Answer with question details for results
 export interface TestAnswer {
   questionId: string;
-  answer: string | string[];
+  questionText: string;
+  userAnswer: boolean;
+  correctAnswer: boolean;
   isCorrect: boolean;
 }
 
@@ -55,7 +79,7 @@ export interface TestResult {
   id: string;
   testId: string;
   testTitle: string;
-  // Test taker info (not authenticated)
+  // Test taker info
   takerName: string;
   takerEmail: string;
   takerPhone?: string;
@@ -64,7 +88,7 @@ export interface TestResult {
   correctCount: number;
   totalQuestions: number;
   percentage: number;
-  determinedLevel?: EnglishLevel; // for level tests
+  determinedLevel?: EnglishLevel;
   // Timing
   startedAt: Date;
   completedAt: Date;
