@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo/DialectLogo.png';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -25,8 +26,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-indigo-600">
-            Dialect
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Dialect" className="w-[120px]" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -53,7 +54,7 @@ export function Header() {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to="/app"
                   className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors"
                 >
                   Dashboard
@@ -120,7 +121,7 @@ export function Header() {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to="/app"
                   onClick={() => setIsMenuOpen(false)}
                   className="text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-lg text-center"
                 >

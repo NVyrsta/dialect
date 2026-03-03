@@ -24,7 +24,7 @@ export function Signup() {
 
     try {
       await signup(email, password, name);
-      navigate('/dashboard');
+      navigate('/app');
     } catch {
       setError('Failed to create account. Email may already be in use.');
     } finally {
@@ -38,7 +38,7 @@ export function Signup() {
 
     try {
       await loginWithGoogle();
-      navigate('/dashboard');
+      navigate('/app');
     } catch {
       setError('Failed to sign up with Google');
     } finally {

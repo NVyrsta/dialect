@@ -17,7 +17,7 @@ export function Login() {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate('/app');
     } catch {
       setError('Invalid email or password');
     } finally {
@@ -31,7 +31,7 @@ export function Login() {
 
     try {
       await loginWithGoogle();
-      navigate('/dashboard');
+      navigate('/app');
     } catch {
       setError('Failed to sign in with Google');
     } finally {
