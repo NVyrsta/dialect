@@ -11,6 +11,10 @@ import { Signup } from './pages/Signup';
 import { PlatformDashboard } from './pages/platform/PlatformDashboard';
 import { Profile } from './pages/platform/Profile';
 import { Users } from './pages/platform/Users';
+import { Tests } from './pages/platform/Tests';
+import { Books } from './pages/platform/Books';
+import { Results } from './pages/platform/Results';
+import { TakeTest } from './pages/TakeTest';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAdmin, loading } = useAuth();
@@ -45,6 +49,9 @@ function App() {
             <Route path="signup" element={<Signup />} />
           </Route>
 
+          {/* Public test route - no auth required */}
+          <Route path="/test/:testId" element={<TakeTest />} />
+
           {/* Platform routes with sidebar */}
           <Route path="/app" element={<PlatformLayout />}>
             <Route index element={<PlatformDashboard />} />
@@ -54,6 +61,30 @@ function App() {
               element={
                 <AdminRoute>
                   <Users />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="library/tests"
+              element={
+                <AdminRoute>
+                  <Tests />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="library/books"
+              element={
+                <AdminRoute>
+                  <Books />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="results"
+              element={
+                <AdminRoute>
+                  <Results />
                 </AdminRoute>
               }
             />
