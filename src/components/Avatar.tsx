@@ -24,6 +24,7 @@ export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) 
       <img
         src={src}
         alt={name}
+        referrerPolicy="no-referrer"
         className={`${sizeClasses[size]} rounded-full object-cover ${className}`}
       />
     );

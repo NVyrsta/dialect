@@ -261,6 +261,8 @@ export function Books() {
                   <img
                     src={getBookCoverUrl(book)}
                     alt={book.title}
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
                     className="w-full h-full object-cover"
                     onError={() => handleImageError(book.id)}
                   />
