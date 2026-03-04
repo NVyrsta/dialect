@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { updateUserProfile } from '../../services/userService';
 import { Avatar } from '../../components/Avatar';
+import { USER_ROLES, USER_ROLE_LABELS } from '../../types/user';
 
 export function Profile() {
   const { profile, refreshProfile } = useAuth();
@@ -78,12 +79,16 @@ export function Profile() {
               <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                    profile.role === 'admin'
+                    profile.role === USER_ROLES.ADMIN
                       ? 'bg-purple-100 text-purple-700'
-                      : 'bg-blue-100 text-blue-700'
+                      : profile.role === USER_ROLES.TEACHER
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : profile.role === USER_ROLES.STUDENT
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700'
                   }`}
                 >
-                  {profile.role}
+                  {USER_ROLE_LABELS[profile.role]}
                 </span>
               </div>
             </div>

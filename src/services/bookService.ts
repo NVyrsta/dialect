@@ -15,7 +15,6 @@ import type { Book } from '../types/book';
 
 const BOOKS_COLLECTION = 'books';
 
-// Helper to convert Firestore timestamps
 const convertTimestamps = <T>(data: Record<string, unknown>): Omit<T, 'id'> => {
   const result = { ...data } as Record<string, unknown>;
 
@@ -28,8 +27,6 @@ const convertTimestamps = <T>(data: Record<string, unknown>): Omit<T, 'id'> => {
 
   return result as Omit<T, 'id'>;
 };
-
-// ============ BOOKS CRUD ============
 
 export async function getAllBooks(): Promise<Book[]> {
   const q = query(

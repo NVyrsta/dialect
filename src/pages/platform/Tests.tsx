@@ -31,8 +31,6 @@ export function Tests() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  // Question modal
   const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
@@ -43,8 +41,6 @@ export function Tests() {
     level: ENGLISH_LEVELS.A1 as EnglishLevel,
   });
   const [savingQuestion, setSavingQuestion] = useState(false);
-
-  // Test modal
   const [showTestModal, setShowTestModal] = useState(false);
   const [editingTest, setEditingTest] = useState<Test | null>(null);
   const [testForm, setTestForm] = useState({
@@ -74,8 +70,6 @@ export function Tests() {
       setLoading(false);
     }
   };
-
-  // ============ Questions ============
 
   const openAddQuestion = () => {
     setEditingQuestion(null);
@@ -150,8 +144,6 @@ export function Tests() {
       console.error('Failed to delete question:', error);
     }
   };
-
-  // ============ Tests ============
 
   const openAddTest = () => {
     setEditingTest(null);

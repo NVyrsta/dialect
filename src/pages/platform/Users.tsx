@@ -3,6 +3,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getAllUsers, updateUserProfile, deleteUserProfile } from '../../services/userService';
 import { Avatar } from '../../components/Avatar';
 import type { UserProfile, UserRole } from '../../types/user';
+import { USER_ROLES, USER_ROLE_LABELS } from '../../types/user';
+
+const ROLE_COLORS: Record<UserRole, string> = {
+  [USER_ROLES.ADMIN]: 'bg-purple-100 text-purple-700',
+  [USER_ROLES.TEACHER]: 'bg-emerald-100 text-emerald-700',
+  [USER_ROLES.STUDENT]: 'bg-blue-100 text-blue-700',
+  [USER_ROLES.GUEST]: 'bg-gray-100 text-gray-700',
+};
 
 export function Users() {
   const { isAdmin, profile: currentUser } = useAuth();
@@ -93,7 +101,10 @@ export function Users() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Students & Users</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+          <p className="text-gray-500 mt-1">Manage users and their roles</p>
+        </div>
         <span className="text-sm text-gray-500">{users.length} users</span>
       </div>
 
@@ -114,13 +125,9 @@ export function Users() {
                 </div>
               </div>
               <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  user.role === 'admin'
-                    ? 'bg-purple-100 text-purple-700'
-                    : 'bg-blue-100 text-blue-700'
-                }`}
+                className={`px-2 py-1 text-xs font-medium rounded-full ${ROLE_COLORS[user.role]}`}
               >
-                {user.role}
+                {USER_ROLE_LABELS[user.role]}
               </span>
             </div>
             <div className="mt-3 text-xs text-gray-400">
@@ -181,8 +188,10 @@ export function Users() {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                 >
-                  <option value="student">Student</option>
-                  <option value="admin">Admin</option>
+                  <option value={USER_ROLES.ADMIN}>{USER_ROLE_LABELS[USER_ROLES.ADMIN]}</option>
+                  <option value={USER_ROLES.TEACHER}>{USER_ROLE_LABELS[USER_ROLES.TEACHER]}</option>
+                  <option value={USER_ROLES.STUDENT}>{USER_ROLE_LABELS[USER_ROLES.STUDENT]}</option>
+                  <option value={USER_ROLES.GUEST}>{USER_ROLE_LABELS[USER_ROLES.GUEST]}</option>
                 </select>
               </div>
 

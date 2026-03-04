@@ -37,7 +37,6 @@ const emptyForm: FormData = {
   publishedYear: '',
 };
 
-// Get cover image URL - use custom coverUrl or auto-generate from Google Drive
 function getBookCoverUrl(book: Book): string {
   if (book.coverUrl) return book.coverUrl;
   return getGoogleDriveThumbnailUrl(book.googleDocsId, 400);
@@ -49,8 +48,6 @@ export function Books() {
   const [saving, setSaving] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState<FormData>(emptyForm);
@@ -104,7 +101,6 @@ export function Books() {
     e.preventDefault();
     setFormError('');
 
-    // Validate Google Docs URL
     const googleDocsId = extractGoogleDocsId(formData.googleDocsUrl);
     if (!googleDocsId) {
       setFormError('Invalid Google Drive URL. Please paste a valid Google Drive file link.');
@@ -156,7 +152,6 @@ export function Books() {
     setImageErrors(prev => ({ ...prev, [bookId]: true }));
   };
 
-  // Filter books by search query
   const filteredBooks = books.filter((book) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();

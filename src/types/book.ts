@@ -1,4 +1,3 @@
-// Book categories
 export const BOOK_CATEGORIES = {
   GRAMMAR: 'grammar',
   VOCABULARY: 'vocabulary',
@@ -23,7 +22,6 @@ export const BOOK_CATEGORY_LABELS: Record<BookCategory, string> = {
   other: 'Other',
 };
 
-// Book levels
 export const BOOK_LEVELS = {
   BEGINNER: 'beginner',
   ELEMENTARY: 'elementary',
@@ -51,29 +49,25 @@ export interface Book {
   description: string;
   category: BookCategory;
   level: BookLevel;
-  googleDocsId: string; // Just the document ID from Google Docs URL
-  coverUrl: string | null; // Firebase Storage URL
+  googleDocsId: string;
+  coverUrl: string | null;
   publishedYear?: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Helper to extract Google Docs ID from URL
 export function extractGoogleDocsId(url: string): string | null {
-  // Matches patterns like:
   // https://docs.google.com/document/d/DOCUMENT_ID/...
   // https://drive.google.com/file/d/FILE_ID/...
   const docMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (docMatch) return docMatch[1];
 
-  // Also try ?id= parameter
   const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (idMatch) return idMatch[1];
 
   return null;
 }
 
-// Generate Google Docs URLs from ID
 export function getGoogleDocsViewUrl(docId: string): string {
   return `https://docs.google.com/document/d/${docId}/view`;
 }
@@ -90,7 +84,6 @@ export function getGoogleDocsDocxUrl(docId: string): string {
   return `https://docs.google.com/document/d/${docId}/export?format=docx`;
 }
 
-// For Google Drive files (PDFs, etc.)
 export function getGoogleDriveViewUrl(fileId: string): string {
   return `https://drive.google.com/file/d/${fileId}/view`;
 }
@@ -99,7 +92,6 @@ export function getGoogleDriveDownloadUrl(fileId: string): string {
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
 
-// Generate thumbnail URL from Google Drive file ID
 export function getGoogleDriveThumbnailUrl(fileId: string, size = 400): string {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
 }

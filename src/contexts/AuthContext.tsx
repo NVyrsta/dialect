@@ -13,12 +13,17 @@ import type { User } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { createUserProfile, getUserProfile } from '../services/userService';
 import type { UserProfile } from '../types/user';
+import { USER_ROLES } from '../types/user';
 
 interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  isTeacher: boolean;
+  isStudent: boolean;
+  isGuest: boolean;
+  canManageLessons: boolean; // admin or teacher
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -106,7 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === USER_ROLES.ADMIN;
+  const isTeacher = profile?.role === USER_ROLES.TEACHER;
+  const isStudent = profile?.role === USER_ROLES.STUDENT;
+  const isGuest = profile?.role === USER_ROLES.GUEST;
+  const canManageLessons = isAdmin || isTeacher;
 
   return (
     <AuthContext.Provider
@@ -115,6 +124,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         isAdmin,
+        isTeacher,
+        isStudent,
+        isGuest,
+        canManageLessons,
         login,
         signup,
         loginWithGoogle,

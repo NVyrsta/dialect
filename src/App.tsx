@@ -14,6 +14,7 @@ import { Users } from './pages/platform/Users';
 import { Tests } from './pages/platform/Tests';
 import { Books } from './pages/platform/Books';
 import { Results } from './pages/platform/Results';
+import { Lessons } from './pages/platform/Lessons';
 import { TakeTest } from './pages/TakeTest';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -88,6 +89,7 @@ function App() {
                 </AdminRoute>
               }
             />
+            <Route path="lessons" element={<Lessons />} />
           </Route>
         </Routes>
       </AuthProvider>

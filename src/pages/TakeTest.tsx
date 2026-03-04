@@ -5,7 +5,6 @@ import type { TestWithQuestions, TestAnswer } from '../types/test';
 
 type Step = 'info' | 'test' | 'result';
 
-// Normalize correctAnswer to boolean (handles string "true"/"false" from Firebase)
 function normalizeAnswer(answer: unknown): boolean {
   if (typeof answer === 'boolean') return answer;
   if (typeof answer === 'string') {
@@ -14,15 +13,13 @@ function normalizeAnswer(answer: unknown): boolean {
   return false;
 }
 
-// Email validation
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
-// Phone validation (Ukrainian format or international)
 function isValidPhone(phone: string): boolean {
-  if (!phone) return true; // Optional field
+  if (!phone) return true;
   const phoneRegex = /^[\d\s\-+()]{10,}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 }
@@ -34,21 +31,14 @@ export function TakeTest() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Steps
   const [step, setStep] = useState<Step>('info');
-
-  // User info
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [formErrors, setFormErrors] = useState<{ email?: string; phone?: string }>({});
-
-  // Test state
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [startedAt, setStartedAt] = useState<Date | null>(null);
-
-  // Result
   const [result, setResult] = useState<{
     percentage: number;
     level: string;
@@ -129,7 +119,6 @@ export function TakeTest() {
 
     setSubmitting(true);
 
-    // Build answers array with question details
     const testAnswers: TestAnswer[] = test.questions.map((q) => {
       const userAnswer = answers[q.id] ?? false;
       const correctAnswer = normalizeAnswer(q.correctAnswer);
@@ -196,7 +185,6 @@ export function TakeTest() {
 
   if (!test) return null;
 
-  // Step: Info form
   if (step === 'info') {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -276,7 +264,6 @@ export function TakeTest() {
     );
   }
 
-  // Step: Test (Yes/No questions)
   if (step === 'test') {
     const question = test.questions[currentQuestion];
     const isLastQuestion = currentQuestion === test.questions.length - 1;
@@ -364,7 +351,6 @@ export function TakeTest() {
     );
   }
 
-  // Step: Result
   if (step === 'result' && result) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">

@@ -19,7 +19,6 @@ const TESTS_COLLECTION = 'tests';
 const QUESTIONS_COLLECTION = 'questions';
 const RESULTS_COLLECTION = 'testResults';
 
-// Helper to convert Firestore timestamps
 function convertTimestamps<T>(data: Record<string, unknown>): Omit<T, 'id'> {
   const result = { ...data } as Record<string, unknown>;
 
@@ -38,8 +37,6 @@ function convertTimestamps<T>(data: Record<string, unknown>): Omit<T, 'id'> {
 
   return result as Omit<T, 'id'>;
 }
-
-// ============ QUESTIONS ============
 
 export async function getAllQuestions(): Promise<Question[]> {
   const q = query(
@@ -112,8 +109,6 @@ export async function deleteQuestion(questionId: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
-// ============ TESTS ============
-
 export async function getAllTests(): Promise<Test[]> {
   const q = query(
     collection(db, TESTS_COLLECTION),
@@ -139,12 +134,10 @@ export async function getTestById(testId: string): Promise<Test | null> {
   };
 }
 
-// Get test with all questions populated
 export async function getTestWithQuestions(testId: string): Promise<TestWithQuestions | null> {
   const test = await getTestById(testId);
   if (!test) return null;
 
-  // Fetch all questions for this test
   const questions: Question[] = [];
   for (const qId of test.questionIds) {
     const question = await getQuestionById(qId);
@@ -192,8 +185,6 @@ export async function deleteTest(testId: string): Promise<void> {
   const docRef = doc(db, TESTS_COLLECTION, testId);
   await deleteDoc(docRef);
 }
-
-// ============ TEST RESULTS ============
 
 export async function getAllTestResults(): Promise<TestResult[]> {
   const q = query(
@@ -245,7 +236,6 @@ export async function submitTestResult(
   return docRef.id;
 }
 
-// Determine English level based on test percentage
 function determineLevel(percentage: number): EnglishLevel {
   if (percentage >= 90) return ENGLISH_LEVELS.C2;
   if (percentage >= 80) return ENGLISH_LEVELS.C1;
@@ -255,7 +245,6 @@ function determineLevel(percentage: number): EnglishLevel {
   return ENGLISH_LEVELS.A1;
 }
 
-// Generate shareable test link
 export function generateTestLink(testId: string): string {
   const baseUrl = window.location.origin;
   return `${baseUrl}/dialect/test/${testId}`;
