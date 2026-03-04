@@ -9,7 +9,10 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 type UserViewRole = 'admin' | 'teacher' | 'student';
 
-function lessonToCalendarEvent(lesson: Lesson, userRole: UserViewRole): CalendarEvent {
+function lessonToCalendarEvent(
+  lesson: Lesson,
+  userRole: UserViewRole
+): CalendarEvent {
   const [startHour, startMin] = lesson.startTime.split(':').map(Number);
   const [endHour, endMin] = lesson.endTime.split(':').map(Number);
 
@@ -32,7 +35,7 @@ function lessonToCalendarEvent(lesson: Lesson, userRole: UserViewRole): Calendar
     title,
     start,
     end,
-    resource: lesson,
+    resource: lesson
   };
 }
 
@@ -56,7 +59,7 @@ const localizer = dateFnsLocalizer({
   parse,
   startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
   getDay,
-  locales,
+  locales
 });
 
 const messages = {
@@ -70,7 +73,7 @@ const messages = {
   date: 'Date',
   time: 'Time',
   event: 'Lesson',
-  noEventsInRange: 'No lessons in this period',
+  noEventsInRange: 'No lessons in this period'
 };
 
 interface LessonCalendarProps {
@@ -86,7 +89,7 @@ export function LessonCalendar({
   onSelectLesson,
   onSelectSlot,
   isAdmin = false,
-  userRole = 'student',
+  userRole = 'student'
 }: LessonCalendarProps) {
   const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -96,7 +99,8 @@ export function LessonCalendar({
     return Views.MONTH;
   };
 
-  const [preferredView, setPreferredView] = useState<(typeof Views)[keyof typeof Views]>(getDefaultView());
+  const [preferredView, setPreferredView] =
+    useState<(typeof Views)[keyof typeof Views]>(getDefaultView());
 
   const currentView = useMemo(() => {
     if (isMobile && preferredView === Views.MONTH) {
@@ -147,8 +151,8 @@ export function LessonCalendar({
         border: `2px solid ${borderColor}`,
         color: 'white',
         fontSize: '13px',
-        padding: '2px 6px',
-      },
+        padding: '2px 6px'
+      }
     };
   }, []);
 
@@ -156,10 +160,12 @@ export function LessonCalendar({
     ({ event }: { event: CalendarEvent }) => {
       const lesson = event.resource;
       const tooltipContent = [
-        userRole === USER_ROLES.STUDENT ? `Teacher: ${lesson.teacherName}` : `Student: ${lesson.studentName}`,
+        userRole === USER_ROLES.STUDENT
+          ? `Teacher: ${lesson.teacherName}`
+          : `Student: ${lesson.studentName}`,
         `Time: ${lesson.startTime} - ${lesson.endTime}`,
         lesson.topic && `Topic: ${lesson.topic}`,
-        lesson.homework && `Homework: ${lesson.homework}`,
+        lesson.homework && `Homework: ${lesson.homework}`
       ]
         .filter(Boolean)
         .join('\n');
@@ -303,21 +309,7 @@ export function LessonCalendar({
         .rbc-allday-cell {
           display: none;
         }
-        .rbc-time-view {
-          border: 1px solid #e5e7eb;
-          border-radius: 0.5rem;
-          overflow: hidden;
-        }
-        .rbc-time-view .rbc-header {
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .rbc-time-content {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .rbc-time-content::-webkit-scrollbar {
-          display: none;
-        }
+
       `}</style>
       <Calendar
         localizer={localizer}
@@ -334,12 +326,16 @@ export function LessonCalendar({
         selectable={isAdmin}
         eventPropGetter={eventStyleGetter}
         messages={messages}
-        views={isMobile ? [Views.AGENDA, Views.DAY] : [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+        views={
+          isMobile
+            ? [Views.AGENDA, Views.DAY]
+            : [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]
+        }
         popup
         culture="en-US"
         length={30}
         components={{
-          event: EventComponent,
+          event: EventComponent
         }}
       />
 
